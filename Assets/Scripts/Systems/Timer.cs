@@ -9,25 +9,10 @@ public class Timer : MonoBehaviour {
     private float elapsedTime = 0f;
     private bool isRunning = false;
 
-    public float Duration => duration;  
-    public float ElapsedTime => elapsedTime;
-
-    private void Start() {
-        if (autoStart)
-            StartTimer();
+    public float Duration => duration;
+    public float GetElapsedTime() {
+        return elapsedTime;
     }
-
-    private void Update() {
-        if (!isRunning) return;
-
-        elapsedTime += Time.deltaTime;
-
-        if (elapsedTime >= duration) {
-            isRunning = false;
-            elapsedTime = duration;
-        }
-    }
-
     /// <summary>
     /// Start or restart the timer.
     /// </summary>
@@ -58,4 +43,24 @@ public class Timer : MonoBehaviour {
         duration = newDuration;
         ResetTimer();
     }
+
+
+    private void Start() {
+        if (autoStart)
+            StartTimer();
+    }
+
+    private void Update() {
+        if (!isRunning) return;
+
+        elapsedTime += Time.deltaTime;
+
+        if (elapsedTime >= duration) {
+            isRunning = false;
+            elapsedTime = duration;
+        }
+    }
+
+   
+   
 }

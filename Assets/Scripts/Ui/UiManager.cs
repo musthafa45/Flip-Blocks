@@ -25,8 +25,6 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Toggle toggle_7x7;
     [SerializeField] private Toggle toggle_8x8;
 
-    public event Action<Vector2Int> OnGridSizeSelected; // Event to notify selection
-
     private List<Toggle> toggles = new List<Toggle>();
 
     private void Awake() {
@@ -107,7 +105,7 @@ public class UiManager : MonoBehaviour
 
     private void UpdateTimerUi() {
         if (gameTimer != null) {
-            float remainingTime = Mathf.Max(0f, gameTimer.ElapsedTime);
+            float remainingTime = Mathf.Max(0f, gameTimer.GetElapsedTime());
             int minutes = Mathf.FloorToInt(remainingTime / 60f);
             int seconds = Mathf.FloorToInt(remainingTime % 60f);
             timerText.text = $"{minutes:00}:{seconds:00}";

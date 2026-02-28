@@ -8,6 +8,14 @@ public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
 
     public static event Action OnGameStart;
+    public event EventHandler<OnGameFinishedArgs> OnGameFinished;
+
+    public class OnGameFinishedArgs : EventArgs {
+        public float finalTime;
+        public int finalScore;
+        public int totalTurns;
+        public LossType lossType;
+    }
 
     [SerializeField] private GridSystem gridSystem;
     [SerializeField] private Timer gameTimer;
@@ -22,7 +30,13 @@ public class GameManager : MonoBehaviour {
     public float CardInitialHideDelay => cardInitialHideDelay;
 
     private void Awake() {
-        Instance = this;    
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start() {
@@ -107,7 +121,16 @@ public class GameManager : MonoBehaviour {
     private void CheckforWin() {
         if(gridSystem.GetTotalSlots() / 2 == scoreCounter.GetScore()) { // All pairs matched 
             gameTimer.StopTimer();
-            Debug.Log($"You win! Time: {Mathf.RoundToInt(gameTimer.ElapsedTime)} seconds, Turns: {turnCounter.GetTurnCount()}");
+            Debug.Log($"You win! Time: {Mathf.RoundToInt(gameTimer.GetElapsedTime())} seconds, Turns: {turnCounter.GetTurnCount()}");
+
+            OnGameFinishedArgs args = new OnGameFinishedArgs {
+                finalTime = gameTimer.GetElapsedTime(),
+                finalScore = scoreCounter.GetScore(),
+                totalTurns = turnCounter.GetTurnCount(),
+                lossType = LossType.None
+            };
+
+            OnGameFinished?.Invoke(this, args);
         }
     }
 
