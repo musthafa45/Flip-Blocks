@@ -532,8 +532,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9976ea2e2713e84bb1c77e5bd8c96aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridXY: {x: 2, y: 2}
+  gridXY: {x: 3, y: 4}
   gridHolderRectTransform: {fileID: 1302416577}
+  cardPrefab: {fileID: 1302021312709119693, guid: 60f9bba2a0e5bc948a2896f82ed55aea, type: 3}
   spaceBetweenSlotsX: -500
   spaceBetweenSlotsY: -100
 --- !u!1 &1302416576
