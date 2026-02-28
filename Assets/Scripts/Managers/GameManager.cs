@@ -7,14 +7,19 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager Instance { get; private set; }
 
+    public static event Action OnGameStart;
+
     [SerializeField] private GridSystem gridSystem;
     [SerializeField] private Timer gameTimer;
     [SerializeField] private ScoreCounter scoreCounter;
     [SerializeField] private TurnCounter turnCounter;
 
+    [SerializeField] private float cardInitialHideDelay = 3f; // delay before cards are initially hidden at game start
     [SerializeField] private float flipBackDelay = 1f; // delay before flipping back unmatched cards
 
     private List<Card> flippedCards = new List<Card>();
+
+    public float CardInitialHideDelay => cardInitialHideDelay;
 
     private void Awake() {
         Instance = this;    
@@ -25,11 +30,23 @@ public class GameManager : MonoBehaviour {
     }
 
     public void InitializeNewGame(Vector2Int gridSize) {
+        // initialize grid, 
         gridSystem.InitializeGrid(gridSize);
+
+        // reset timer
         gameTimer.ResetTimer();
+
+        // reset score
         gameTimer.StartTimer();
+
+        // reset score
         scoreCounter.ResetScore();
+
+        // reset turns
         turnCounter.ResetTurn();
+
+        // Notify subscribers that a new game has started
+        OnGameStart?.Invoke();
     }
 
     private void OnEnable() {
@@ -39,6 +56,10 @@ public class GameManager : MonoBehaviour {
 
     private void OnDisable() {
         Card.OnAnyCardButtonPressed -= Card_OnAnyCardButtonPressed;
+    }
+
+    private void OnDestroy() {
+        OnGameStart = null; // Clear event subscribers to prevent memory leaks
     }
 
     private void Card_OnAnyCardButtonPressed(object sender, EventArgs e) {
@@ -66,8 +87,8 @@ public class GameManager : MonoBehaviour {
             // Match found
             Debug.Log($"Matched: {first.GetCardType()} & {second.GetCardType()}");
 
-            first.DisableButton();
-            second.DisableButton();
+            first.SetActiveButton(false);
+            second.SetActiveButton(false);
 
             scoreCounter.AddScore(1); // Increment score for a match
 
@@ -77,7 +98,7 @@ public class GameManager : MonoBehaviour {
             // No match, flip back after delay
             Debug.Log($"No match: {first.GetCardType()} & {second.GetCardType()}");
             
-            StartCoroutine(FlipBackAnimWithDelay(first, second, 0.5f ));
+            StartCoroutine(FlipBackAnimWithDelay(first, second, flipBackDelay));
         }
 
         flippedCards.Clear();

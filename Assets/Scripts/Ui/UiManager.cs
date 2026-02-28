@@ -44,6 +44,8 @@ public class UiManager : MonoBehaviour
         foreach (Toggle t in toggles) {
             t.onValueChanged.AddListener((isOn) => OnToggleChanged(t, isOn));
         }
+
+        InitializeSelectedToggleAtStart();
     }
 
     private void OnToggleChanged(Toggle changedToggle, bool isOn) {
@@ -69,6 +71,30 @@ public class UiManager : MonoBehaviour
         if (toggle == toggle_7x7) return new Vector2Int(7, 7);
         if (toggle == toggle_8x8) return new Vector2Int(8, 8);
         return new Vector2Int(2, 2); // default fallback
+    }
+
+    private void InitializeSelectedToggleAtStart() {
+        Toggle selectedToggle = null;
+
+        // Find selected toggle
+        foreach (Toggle t in toggles) {
+            if (t.isOn) {
+                selectedToggle = t;
+                break;
+            }
+        }
+
+        // If none selected, select default (2x2)
+        if (selectedToggle == null) {
+            selectedToggle = toggle_2x2;
+            selectedToggle.isOn = true;
+        }
+
+        Vector2Int gridSize = GetGridSizeForToggle(selectedToggle);
+
+        GameManager.Instance.InitializeNewGame(gridSize);
+
+        Debug.Log($"Initial Grid Size: {gridSize.x} x {gridSize.y}");
     }
 
     private void Update() {

@@ -20,8 +20,8 @@ public class Card : MonoBehaviour {
     private bool isFlipped = false;
     private bool isMatched = false;
 
-    public void DisableButton() {
-        button.enabled = false;
+    public void SetActiveButton(bool v) {
+        button.enabled = v;
     }
 
     public void InitializeCard(CardType type = CardType.None) {
@@ -29,9 +29,11 @@ public class Card : MonoBehaviour {
         UpdateUi(type);
         isFlipped = false;
         isMatched = false;
-        numberText.gameObject.SetActive(false); // hide number initially
         transform.localScale = Vector3.one; // reset scale
+        numberText.gameObject.SetActive(false); // hide number initially
     }
+
+ 
 
     public CardType GetCardType() => cardType;
 
@@ -61,8 +63,32 @@ public class Card : MonoBehaviour {
         button.onClick.AddListener(OnButtonPressed);
     }
 
+    private void OnEnable() {
+        GameManager.OnGameStart += GameManager_OnGameStart;
+    }
+
+    private void GameManager_OnGameStart() {
+        SetActiveButton(false);
+        StartCoroutine(ShowCardAtStart());
+    }
+
+    private IEnumerator ShowCardAtStart() {
+        // Flip and show
+        yield return FlipAnimation(true);
+
+        // Wait
+        yield return new WaitForSeconds(GameManager.Instance.CardInitialHideDelay);
+
+        // Flip back
+        yield return FlipAnimation(false);
+
+        SetActiveButton(true);
+    }
+
+
     private void OnDisable() {
         button.onClick.RemoveListener(OnButtonPressed);
+        GameManager.OnGameStart -= GameManager_OnGameStart;
     }
 
     private void OnButtonPressed() {

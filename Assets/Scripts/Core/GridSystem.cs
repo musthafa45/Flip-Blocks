@@ -43,9 +43,9 @@ public class GridSystem : MonoBehaviour {
         slots = null;
     }
 
-    private void Start() {
-        GenerateGrid();
-    }
+    //private void Start() {
+    //    GenerateGrid();
+    //}
 
     [ContextMenu("Generate Grid")]
     private void GenerateGrid() {
