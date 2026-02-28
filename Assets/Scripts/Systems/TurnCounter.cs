@@ -3,40 +3,35 @@ using UnityEngine;
 
 public class TurnCounter : MonoBehaviour {
     private int turnCount = 0;
+    private int turnCountMax = 0;
 
-    private Card previousPressedCard;
-
-    private void OnEnable() {
-        Card.OnAnyCardButtonPressed += Card_OnAnyCardButtonPressed;
-    }
-
-    private void OnDisable() {
-        Card.OnAnyCardButtonPressed -= Card_OnAnyCardButtonPressed;
-    }
-
-    private void Card_OnAnyCardButtonPressed(object sender, EventArgs e) {
-        Card pressedCard = (Card)sender;
-
-        // Ignore if the same card is pressed twice in a row
-        if (previousPressedCard == pressedCard)
-            return;
-
-        // Increment turn count
-        turnCount++;
-
-        // Update previous card
-        previousPressedCard = pressedCard;
-
-        //Debug.Log("Turn Count: " + turnCount);
-    }
-
-   
-    public void ResetTurn() {
-        previousPressedCard = null;
+    public void ResetTurn(int totalSlots) {
         turnCount = 0;
+
+        int pairs = totalSlots / 2; // Each pair consists of 2 cards, so total pairs is half the total slots
+        turnCountMax = pairs * 2; // Max turns is 2 per pair (one for each card in the pair)
+    }
+
+    public int GetTurnCountMax() {
+        return turnCountMax;
+    }
+
+    public void AddTurnCount(int turnCount) {
+        this.turnCount++;
+
+        CheckForGameOver();
     }
 
     public int GetTurnCount() {
         return turnCount;
     }
+
+    private void CheckForGameOver() {
+        if(turnCount >= turnCountMax) {
+            // Trigger game over due to too many turns
+            GameManager.Instance.GameOver(LossType.TooManyTurns);
+        }
+    }
+
+   
 }

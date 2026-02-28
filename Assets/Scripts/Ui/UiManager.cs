@@ -43,7 +43,7 @@ public class UiManager : MonoBehaviour
             t.onValueChanged.AddListener((isOn) => OnToggleChanged(t, isOn));
         }
 
-        InitializeSelectedToggleAtStart();
+        InitializeStart();
     }
 
     private void OnToggleChanged(Toggle changedToggle, bool isOn) {
@@ -71,7 +71,7 @@ public class UiManager : MonoBehaviour
         return new Vector2Int(2, 2); // default fallback
     }
 
-    private void InitializeSelectedToggleAtStart() {
+    public void InitializeStart() {
         Toggle selectedToggle = null;
 
         // Find selected toggle
@@ -126,10 +126,10 @@ public class UiManager : MonoBehaviour
 
     private void UpdateTurnUi() {
         if (turnCounter != null) {
-            turnText.text = $"Turn: {turnCounter.GetTurnCount()}";
+            turnText.text = $"Turn: {turnCounter.GetTurnCount()} / {turnCounter.GetTurnCountMax()}";
         }
         else {
-            turnText.text = "Turn: 0";
+            turnText.text = "Turn: 0 / 0";
         }
     }
 }

@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         gameTimer?.StartTimer();
+
+        Card.OnAnyCardButtonPressed += Card_OnAnyCardButtonPressed;
     }
 
     public void InitializeNewGame(Vector2Int gridSize) {
@@ -57,14 +59,24 @@ public class GameManager : MonoBehaviour {
         scoreCounter.ResetScore();
 
         // reset turns
-        turnCounter.ResetTurn();
+        turnCounter.ResetTurn(gridSize.x * gridSize.y);
 
         // Notify subscribers that a new game has started
         OnGameStart?.Invoke();
     }
 
-    private void OnEnable() {
-        Card.OnAnyCardButtonPressed += Card_OnAnyCardButtonPressed;
+    public void GameOver(LossType lossType) {
+        gameTimer.StopTimer();
+        Debug.Log($"You win! Time: {Mathf.RoundToInt(gameTimer.GetElapsedTime())} seconds, Turns: {turnCounter.GetTurnCount()}");
+
+        OnGameFinishedArgs args = new OnGameFinishedArgs {
+            finalTime = gameTimer.GetElapsedTime(),
+            finalScore = scoreCounter.GetScore(),
+            totalTurns = turnCounter.GetTurnCount(),
+            lossType = lossType
+        };
+
+        OnGameFinished?.Invoke(this, args);
     }
 
 
@@ -113,6 +125,8 @@ public class GameManager : MonoBehaviour {
             Debug.Log($"No match: {first.GetCardType()} & {second.GetCardType()}");
             
             StartCoroutine(FlipBackAnimWithDelay(first, second, flipBackDelay));
+
+            turnCounter.AddTurnCount(1); // Decrement turns for a mismatch
         }
 
         flippedCards.Clear();
@@ -139,4 +153,5 @@ public class GameManager : MonoBehaviour {
         first.FlipBackCard();
         second.FlipBackCard();
     }
+
 }

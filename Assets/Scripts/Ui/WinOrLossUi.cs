@@ -18,6 +18,8 @@ public class WinOrLossUi : MonoBehaviour {
     private void Awake() {
         okButton.onClick.AddListener(()=> {
             Hide();
+
+            UiManager.Instance.InitializeStart();
         });
 
         Hide();
