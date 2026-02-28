@@ -57,7 +57,7 @@ public class UiManager : MonoBehaviour
         // Invoke event with corresponding grid size
         Vector2Int gridSize = GetGridSizeForToggle(changedToggle);
         
-        GameManager.Instance.SetGridSizeSelected(gridSize);
+        GameManager.Instance.InitializeNewGame(gridSize);
 
         Debug.Log($"Selected Grid Size: {gridSize.x} x {gridSize.y}");
     }

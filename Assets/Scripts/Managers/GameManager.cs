@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +7,11 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager Instance { get; private set; }
 
-    [SerializeField] private Timer gameTimer;
     [SerializeField] private GridSystem gridSystem;
+    [SerializeField] private Timer gameTimer;
+    [SerializeField] private ScoreCounter scoreCounter;
+    [SerializeField] private TurnCounter turnCounter;
+
     [SerializeField] private float flipBackDelay = 1f; // delay before flipping back unmatched cards
 
     private List<Card> flippedCards = new List<Card>();
@@ -20,8 +24,12 @@ public class GameManager : MonoBehaviour {
         gameTimer?.StartTimer();
     }
 
-    public void SetGridSizeSelected(Vector2Int gridSize) {
+    public void InitializeNewGame(Vector2Int gridSize) {
         gridSystem.InitializeGrid(gridSize);
+        gameTimer.ResetTimer();
+        gameTimer.StartTimer();
+        scoreCounter.ResetScore();
+        turnCounter.ResetTurn();
     }
 
     private void OnEnable() {
@@ -56,19 +64,35 @@ public class GameManager : MonoBehaviour {
 
         if (first.GetCardType() == second.GetCardType()) {
             // Match found
-            Debug.Log($"Matched: {first.GetCardType()}");
+            Debug.Log($"Matched: {first.GetCardType()} & {second.GetCardType()}");
+
             first.DisableButton();
             second.DisableButton();
-            // Optionally mark cards as matched so they cannot be clicked again
+
+            scoreCounter.AddScore(1); // Increment score for a match
+
+            CheckforWin();
         }
         else {
             // No match, flip back after delay
             Debug.Log($"No match: {first.GetCardType()} & {second.GetCardType()}");
-            // Reset cards (you could have a FlipBack() method in Card)
-            //first.FlipCard();
-            //second.InitializeCard(CardType.None);
+            
+            StartCoroutine(FlipBackAnimWithDelay(first, second, 0.5f ));
         }
 
         flippedCards.Clear();
+    }
+
+    private void CheckforWin() {
+        if(gridSystem.GetTotalSlots() / 2 == scoreCounter.GetScore()) { // All pairs matched 
+            gameTimer.StopTimer();
+            Debug.Log($"You win! Time: {Mathf.RoundToInt(gameTimer.ElapsedTime)} seconds, Turns: {turnCounter.GetTurnCount()}");
+        }
+    }
+
+    private IEnumerator FlipBackAnimWithDelay(Card first, Card second,float delay) {
+        yield return new WaitForSeconds(delay);
+        first.FlipBackCard();
+        second.FlipBackCard();
     }
 }

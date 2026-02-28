@@ -22,6 +22,10 @@ public class GridSystem : MonoBehaviour {
         GenerateGrid();
     }
 
+    public int GetTotalSlots() {
+        return gridXY.x * gridXY.y;
+    }
+
     [ContextMenu("Delete Grid")]
     public void DeleteGrid() {
         if (slots == null) return;

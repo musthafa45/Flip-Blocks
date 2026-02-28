@@ -1281,8 +1281,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ec4067e62d0f6d43b4c942ea195f8ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameTimer: {fileID: 242780065}
   gridSystem: {fileID: 242780066}
+  gameTimer: {fileID: 242780065}
+  scoreCounter: {fileID: 242780064}
+  turnCounter: {fileID: 242780068}
   flipBackDelay: 1
 --- !u!1 &792226041
 GameObject:

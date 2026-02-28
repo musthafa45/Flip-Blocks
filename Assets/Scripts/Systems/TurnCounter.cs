@@ -33,6 +33,7 @@ public class TurnCounter : MonoBehaviour {
    
     public void ResetTurn() {
         previousPressedCard = null;
+        turnCount = 0;
     }
 
     public int GetTurnCount() {

@@ -21,9 +21,8 @@ public class Card : MonoBehaviour {
     private bool isMatched = false;
 
     public void DisableButton() {
-        button.interactable = false;    
+        button.enabled = false;
     }
-
 
     public void InitializeCard(CardType type = CardType.None) {
         cardType = type;
@@ -37,13 +36,19 @@ public class Card : MonoBehaviour {
     public CardType GetCardType() => cardType;
 
     public void FlipCard() {
-        if (flipRoutine != null) StopCoroutine(flipRoutine);
+        if (flipRoutine != null) {
+            StopCoroutine(flipRoutine);
+        }
+           
         flipRoutine = StartCoroutine(FlipAnimation(showNumber: true));
         isFlipped = true;
     }
 
     public void FlipBackCard(float delay = 0.5f) {
-        if (flipRoutine != null) StopCoroutine(flipRoutine);
+        if (flipRoutine != null) {
+            StopCoroutine(flipRoutine);
+        }
+            
         flipRoutine = StartCoroutine(FlipBackAnimation(delay));
         isFlipped = false;
     }
