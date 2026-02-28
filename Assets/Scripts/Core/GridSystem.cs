@@ -16,7 +16,12 @@ public class GridSystem : MonoBehaviour {
     private SlotData[,] slots;
     private List<CardType> cardPool = new List<CardType>();
 
-    
+
+    public void InitializeGrid(Vector2Int gridSize) {
+        gridXY = gridSize;
+        GenerateGrid();
+    }
+
     [ContextMenu("Delete Grid")]
     public void DeleteGrid() {
         if (slots == null) return;
@@ -168,6 +173,8 @@ public class GridSystem : MonoBehaviour {
             }
         }
     }
+
+ 
 
     [System.Serializable]
     public class SlotData {

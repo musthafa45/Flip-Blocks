@@ -20,20 +20,10 @@ public class Card : MonoBehaviour {
     private bool isFlipped = false;
     private bool isMatched = false;
 
-    private void Awake() {
-        button.onClick.AddListener(OnButtonPressed);
+    public void DisableButton() {
+        button.interactable = false;    
     }
 
-    private void OnDisable() {
-        button.onClick.RemoveListener(OnButtonPressed);
-    }
-
-    private void OnButtonPressed() {
-        if (isFlipped || isMatched) return;
-
-        FlipCard();
-        OnAnyCardButtonPressed?.Invoke(this, new OnAnyCardButtonPressedArgs { card = this });
-    }
 
     public void InitializeCard(CardType type = CardType.None) {
         cardType = type;
@@ -45,10 +35,6 @@ public class Card : MonoBehaviour {
     }
 
     public CardType GetCardType() => cardType;
-
-    private void UpdateUi(CardType type) {
-        numberText.text = ((int)type).ToString();
-    }
 
     public void FlipCard() {
         if (flipRoutine != null) StopCoroutine(flipRoutine);
@@ -66,8 +52,27 @@ public class Card : MonoBehaviour {
         isMatched = true;
     }
 
+    private void Awake() {
+        button.onClick.AddListener(OnButtonPressed);
+    }
+
+    private void OnDisable() {
+        button.onClick.RemoveListener(OnButtonPressed);
+    }
+
+    private void OnButtonPressed() {
+        if (isFlipped || isMatched) return;
+
+        FlipCard();
+        OnAnyCardButtonPressed?.Invoke(this, new OnAnyCardButtonPressedArgs { card = this });
+    }
+
+    private void UpdateUi(CardType type) {
+        numberText.text = ((int)type).ToString();
+    }
+
     private IEnumerator FlipAnimation(bool showNumber) {
-        float duration = 0.25f;
+        float duration = 0.1f;
         Vector3 startScale = transform.localScale;
         Vector3 midScale = new Vector3(0f, startScale.y, startScale.z);
 
@@ -99,6 +104,8 @@ public class Card : MonoBehaviour {
         yield return new WaitForSeconds(delay);
         yield return FlipAnimation(showNumber: false); // hide number when flipping back
     }
+
+  
 }
 
 public enum CardType {

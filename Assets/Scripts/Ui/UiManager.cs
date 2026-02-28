@@ -1,10 +1,15 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
+    public static UiManager Instance { get; private set; }
+
+
+
     [SerializeField] private ScoreCounter scoreCounter;
     [SerializeField] private TurnCounter turnCounter;
     [SerializeField] private Timer gameTimer;
@@ -13,13 +18,65 @@ public class UiManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI turnText;
     [SerializeField] private TextMeshProUGUI timerText;
 
+    [Header("Grid Size Toggles")]
+    [SerializeField] private Toggle toggle_2x2;
+    [SerializeField] private Toggle toggle_3x3;
+    [SerializeField] private Toggle toggle_5x6;
+    [SerializeField] private Toggle toggle_7x7;
+    [SerializeField] private Toggle toggle_8x8;
+
+    public event Action<Vector2Int> OnGridSizeSelected; // Event to notify selection
+
+    private List<Toggle> toggles = new List<Toggle>();
+
+    private void Awake() {
+        Instance = this;
+    }
+
+    private void Start() {
+        // Add all toggles to list
+        toggles.Add(toggle_2x2);
+        toggles.Add(toggle_3x3);
+        toggles.Add(toggle_5x6);
+        toggles.Add(toggle_7x7);
+        toggles.Add(toggle_8x8);
+
+        foreach (Toggle t in toggles) {
+            t.onValueChanged.AddListener((isOn) => OnToggleChanged(t, isOn));
+        }
+    }
+
+    private void OnToggleChanged(Toggle changedToggle, bool isOn) {
+        if (!isOn) return; // Ignore when toggled off
+
+        // Deselect all other toggles
+        foreach (Toggle t in toggles) {
+            if (t != changedToggle) t.isOn = false;
+        }
+
+        // Invoke event with corresponding grid size
+        Vector2Int gridSize = GetGridSizeForToggle(changedToggle);
+        
+        GameManager.Instance.SetGridSizeSelected(gridSize);
+
+        Debug.Log($"Selected Grid Size: {gridSize.x} x {gridSize.y}");
+    }
+
+    private Vector2Int GetGridSizeForToggle(Toggle toggle) {
+        if (toggle == toggle_2x2) return new Vector2Int(2, 2);
+        if (toggle == toggle_3x3) return new Vector2Int(3, 3);
+        if (toggle == toggle_5x6) return new Vector2Int(5, 6);
+        if (toggle == toggle_7x7) return new Vector2Int(7, 7);
+        if (toggle == toggle_8x8) return new Vector2Int(8, 8);
+        return new Vector2Int(2, 2); // default fallback
+    }
+
     private void Update() {
         UpdateTimerUi();
 
         UpdateScoreUi();
 
         UpdateTurnUi();
-
     }
 
     private void UpdateTimerUi() {
