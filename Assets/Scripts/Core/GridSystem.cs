@@ -162,6 +162,11 @@ public class GridSystem : MonoBehaviour {
                 CardType type = cardPool[poolIndex];
                 Card card = cardInstance.GetComponent<Card>();
                 card.InitializeCard(type);
+
+                if(GetTotalSlots() <= 10) {
+                    card.SetRectSize(200, 200);
+                }
+
                 poolIndex++;
 
                 slots[x, y] = new SlotData {

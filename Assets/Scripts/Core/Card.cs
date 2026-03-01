@@ -140,7 +140,9 @@ public class Card : MonoBehaviour {
         yield return FlipAnimation(showNumber: false); // hide number when flipping back
     }
 
-    
+    public void SetRectSize(float width, float height) {
+        GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
+    }
 }
 
 public enum CardType {

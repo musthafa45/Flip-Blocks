@@ -9,47 +9,57 @@ public class SoundManager : MonoBehaviour {
 
     [Header("Sound Effects")]
     [SerializeField] private SoundData[] soundatas;
-    [SerializeField] private AudioSource gameAmbienceSource;
-    [SerializeField] private float ambienceMusicVolume = 0.5f;
 
     private Dictionary<SoundEffect, AudioClip> soundDictionary;
 
     private void Awake() {
-        if (Instance != null && Instance != this) {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         InitializeDictionary();
     }
 
-    private void Start() {
-        Card.OnAnyCardButtonPressed += (sender, args) => Play(SoundEffect.CardFlip);
-        GameManager.Instance.OnCardsMismatched += (sender, args) => Play(SoundEffect.Mismatch);
-        GameManager.Instance.OnCardsMatched += (sender, args) => Play(SoundEffect.Match);
-        GameManager.Instance.OnGameWin += (sender, args) => Play(SoundEffect.GameWin);
-        GameManager.Instance.OnGameLose += (sender, args) => Play(SoundEffect.GameLose);
+    private void OnEnable() {
+        Card.OnAnyCardButtonPressed += HandleCardFlip;
 
-        SetAmbienceVolume(ambienceMusicVolume);
-        SetAmbiencePlay(true);
-    }
-
-    public void SetAmbiencePlay(bool play) {
-        if (play) {
-            gameAmbienceSource.Play();
-        }
-        else {
-            gameAmbienceSource.Stop();
+        if (GameManager.Instance != null) {
+            GameManager.Instance.OnCardsMismatched += HandleMismatch;
+            GameManager.Instance.OnCardsMatched += HandleMatch;
+            GameManager.Instance.OnGameWin += HandleWin;
+            GameManager.Instance.OnGameLose += HandleLose;
         }
     }
 
-    public void SetAmbienceVolume(float volume) {
-        ambienceMusicVolume = Mathf.Clamp01(volume);
-        gameAmbienceSource.volume = ambienceMusicVolume;
+    private void OnDisable() {
+        Card.OnAnyCardButtonPressed -= HandleCardFlip;
+
+        if (GameManager.Instance != null) {
+            GameManager.Instance.OnCardsMismatched -= HandleMismatch;
+            GameManager.Instance.OnCardsMatched -= HandleMatch;
+            GameManager.Instance.OnGameWin -= HandleWin;
+            GameManager.Instance.OnGameLose -= HandleLose;
+        }
     }
+
+    private void HandleCardFlip(object sender, System.EventArgs e) {
+        Play(SoundEffect.CardFlip);
+    }
+
+    private void HandleMismatch(object sender, System.EventArgs e) {
+        Play(SoundEffect.Mismatch);
+    }
+
+    private void HandleMatch(object sender, System.EventArgs e) {
+        Play(SoundEffect.Match);
+    }
+
+    private void HandleWin(object sender, System.EventArgs e) {
+        Play(SoundEffect.GameWin);
+    }
+
+    private void HandleLose(object sender, System.EventArgs e) {
+        Play(SoundEffect.GameLose);
+    }
+
 
     private void InitializeDictionary() {
         soundDictionary = new Dictionary<SoundEffect, AudioClip>();

@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static GridSystem;
 
 public class GameManager : MonoBehaviour {
 
     public static GameManager Instance { get; private set; }
+
+    public const string MAIN_MENU_SCENE = "01_Main_Menu_Scene";
 
     public static event Action OnGameStart;
     public event EventHandler<OnGameFinishedArgs> OnGameFinished;
@@ -40,15 +43,7 @@ public class GameManager : MonoBehaviour {
     public bool AutoSave => autoSave;
 
     private void Awake() {
-        if (Instance != null && Instance != this) {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        //SaveSystem.DeleteSave(); // Clear any existing save data for testing purposes
     }
 
     private void Start() {
@@ -101,8 +96,9 @@ public class GameManager : MonoBehaviour {
         UiManager.Instance.UpdateToggleUi(new Vector2Int(gameSaveData.columns, gameSaveData.rows));
     }
 
-
-
+    public void LoadMainMenuScene() {
+        SceneManager.LoadScene(MAIN_MENU_SCENE);
+    }
 
     private void OnDisable() {
         Card.OnAnyCardButtonPressed -= Card_OnAnyCardButtonPressed;

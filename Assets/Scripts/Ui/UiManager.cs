@@ -32,6 +32,7 @@ public class UiManager : MonoBehaviour
     [Header("Save UI")]
     [SerializeField] private Image autoSaveImage;
     [SerializeField] private Button manualSaveButton;
+    [SerializeField] private Button mainMenuButton;
 
     private void Awake() {
         Instance = this;
@@ -70,6 +71,10 @@ public class UiManager : MonoBehaviour
                 Invoke(nameof(DisableAutoSaveImage), 1.5f); // Hide after 1.5 seconds
             }
 
+        });
+
+        mainMenuButton.onClick.AddListener(() => {
+            GameManager.Instance.LoadMainMenuScene();
         });
     }
 
