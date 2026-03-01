@@ -12,6 +12,12 @@ public class GameManager : MonoBehaviour {
     public event EventHandler<OnGameFinishedArgs> OnGameFinished;
     public event Action OnGameSaved;
 
+    public event EventHandler OnCardsMismatched;
+    public event EventHandler OnCardsMatched;
+
+    public event EventHandler OnGameWin;
+    public event EventHandler OnGameLose;
+
     public class OnGameFinishedArgs : EventArgs {
         public float finalTime;
         public int finalScore;
@@ -83,6 +89,7 @@ public class GameManager : MonoBehaviour {
         };
 
         OnGameFinished?.Invoke(this, args);
+        OnGameLose?.Invoke(this, args);
     }
 
     public void InitializeSavedGame(GameSaveData gameSaveData) {
@@ -139,6 +146,8 @@ public class GameManager : MonoBehaviour {
             scoreCounter.AddScore(1); // Increment score for a successful match
             turnCounter.AddTurnCount(1); // Increment turn count for each pair of cards flipped
 
+            OnCardsMatched?.Invoke(this,EventArgs.Empty); // Notify subscribers of a successful match (e.g., Audio)
+
             bool isWin = CheckforWin();
             if (isWin) {
                 // Game win logic handled in CheckforWin method
@@ -152,6 +161,8 @@ public class GameManager : MonoBehaviour {
                 };
 
                 OnGameFinished?.Invoke(this, args);
+
+                OnGameWin?.Invoke(this, args);
             }
             else {
                 //Save game state after a successful match if autoSave is enabled
@@ -166,6 +177,8 @@ public class GameManager : MonoBehaviour {
             StartCoroutine(FlipBackAnimWithDelay(first, second, flipBackDelay));
 
             turnCounter.AddTurnCount(1); // Increment turn count for each non pair of cards flipped
+
+            OnCardsMismatched?.Invoke(this,EventArgs.Empty); // Notify subscribers of a mismatch (e.g., Audio)
         }
 
         flippedCards.Clear();
