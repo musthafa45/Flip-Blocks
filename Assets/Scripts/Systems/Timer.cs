@@ -61,6 +61,7 @@ public class Timer : MonoBehaviour {
         }
     }
 
-   
-   
+    public void SetElapsedTime(float elapedTime) {
+        this.elapsedTime = elapedTime;
+    }
 }

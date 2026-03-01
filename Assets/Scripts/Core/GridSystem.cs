@@ -22,8 +22,50 @@ public class GridSystem : MonoBehaviour {
         GenerateGrid();
     }
 
+    public SlotData[,] GetSlots() {
+        return slots;
+    }
+
     public int GetTotalSlots() {
         return gridXY.x * gridXY.y;
+    }
+
+    public Vector2Int GetGridSize() {
+        return gridXY;
+    }
+
+    public void LoadFromSave(GameSaveData data) {
+        InitializeGrid(new Vector2Int(data.columns, data.rows));
+
+        int index = 0;
+
+        for (int x = 0; x < gridXY.x; x++) {
+            for (int y = 0; y < gridXY.y; y++) {
+                SlotData slot = slots[x, y];
+
+                int savedType = data.cardTypes[index];
+                bool wasMatched = data.matchedStates[index];
+
+                if (!data.hasCard[index]) {
+                    // Ensure slot is empty
+                    if (slot.card != null) {
+                        Destroy(slot.card.gameObject);
+                        slot.card = null;
+                    }
+                }
+                else {
+                    CardType type = (CardType)data.cardTypes[index];
+                    slot.card.InitializeCard(type);
+
+                    if (data.matchedStates[index]) {
+                        slot.card.SetMatched(true);
+                        slot.card.EnableNumberText();
+                    }
+                }
+
+                index++;
+            }
+        }
     }
 
     [ContextMenu("Delete Grid")]
@@ -68,10 +110,11 @@ public class GridSystem : MonoBehaviour {
         float cellWidth = usableWidth / columns;
         float cellHeight = usableHeight / rows;
 
-        int totalSlots = columns * rows;
-        int middleIndex = totalSlots / 2; // for odd grids
+        bool isOdd = columns % 2 != 0 && rows % 2 != 0;
+        int centerX = columns / 2;
+        int centerY = rows / 2;
 
-        bool isOdd = totalSlots % 2 != 0;
+        int totalSlots = columns * rows;
         int slotsToFill = isOdd ? totalSlots - 1 : totalSlots;
 
         // Generate card pool
@@ -83,7 +126,7 @@ public class GridSystem : MonoBehaviour {
                 int currentIndex = x * rows + y;
 
                 // Skip middle slot if odd
-                if (isOdd && currentIndex == middleIndex) {
+                if (isOdd && x == centerX && y == centerY) {
 
                     GameObject emptySlot = new GameObject($"EmptySlot_{x}_{y}");
                     emptySlot.transform.SetParent(gridHolderRectTransform, false);

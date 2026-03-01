@@ -19,7 +19,8 @@ public class WinOrLossUi : MonoBehaviour {
         okButton.onClick.AddListener(()=> {
             Hide();
 
-            UiManager.Instance.InitializeStart();
+            //UiManager.Instance.InitializeStart();
+            GameManager.Instance.ResetGame();
         });
 
         Hide();

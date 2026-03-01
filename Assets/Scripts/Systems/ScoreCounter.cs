@@ -15,4 +15,8 @@ public class ScoreCounter : MonoBehaviour
     public void ResetScore() {
         score = 0;
     }
+
+    public void SetScore(int score) {
+        this.score = score;
+    }
 }

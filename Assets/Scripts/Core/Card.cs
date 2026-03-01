@@ -17,7 +17,6 @@ public class Card : MonoBehaviour {
     private CardType cardType;
     private Coroutine flipRoutine;
 
-    private bool isFlipped = false;
     private bool isMatched = false;
 
     public void SetActiveButton(bool v) {
@@ -27,13 +26,23 @@ public class Card : MonoBehaviour {
     public void InitializeCard(CardType type = CardType.None) {
         cardType = type;
         UpdateUi(type);
-        isFlipped = false;
         isMatched = false;
         transform.localScale = Vector3.one; // reset scale
         numberText.gameObject.SetActive(false); // hide number initially
     }
 
- 
+
+    public bool IsMatched() {
+        return isMatched;
+    }
+
+    public void EnableNumberText() {
+        numberText.gameObject.SetActive(true);
+    }
+
+    public void SetMatched(bool isMatched) {
+        this.isMatched = isMatched;
+    }
 
     public CardType GetCardType() => cardType;
 
@@ -43,7 +52,6 @@ public class Card : MonoBehaviour {
         }
            
         flipRoutine = StartCoroutine(FlipAnimation(showNumber: true));
-        isFlipped = true;
     }
 
     public void FlipBackCard(float delay = 0.5f) {
@@ -52,12 +60,8 @@ public class Card : MonoBehaviour {
         }
             
         flipRoutine = StartCoroutine(FlipBackAnimation(delay));
-        isFlipped = false;
     }
 
-    public void SetMatched() {
-        isMatched = true;
-    }
 
     private void Awake() {
         button.onClick.AddListener(OnButtonPressed);
@@ -92,7 +96,7 @@ public class Card : MonoBehaviour {
     }
 
     private void OnButtonPressed() {
-        if (isFlipped || isMatched) return;
+        if (isMatched) return;
 
         FlipCard();
         OnAnyCardButtonPressed?.Invoke(this, new OnAnyCardButtonPressedArgs { card = this });
@@ -136,7 +140,7 @@ public class Card : MonoBehaviour {
         yield return FlipAnimation(showNumber: false); // hide number when flipping back
     }
 
-  
+    
 }
 
 public enum CardType {

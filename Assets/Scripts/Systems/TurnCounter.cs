@@ -25,6 +25,12 @@ public class TurnCounter : MonoBehaviour {
     public int GetTurnCount() {
         return turnCount;
     }
+    public void SetTurnCount(int turnsCount) {
+        this.turnCount = turnsCount;
+    }
+    public void SetTurnCountMax(int turnCountMax) {
+        this.turnCountMax = turnCountMax;
+    }
 
     private void CheckForGameOver() {
         if(turnCount >= turnCountMax) {
@@ -33,5 +39,4 @@ public class TurnCounter : MonoBehaviour {
         }
     }
 
-   
 }

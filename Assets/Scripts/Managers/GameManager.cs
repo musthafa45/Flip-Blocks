@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static GridSystem;
 
 public class GameManager : MonoBehaviour {
 
@@ -9,6 +10,7 @@ public class GameManager : MonoBehaviour {
 
     public static event Action OnGameStart;
     public event EventHandler<OnGameFinishedArgs> OnGameFinished;
+    public event Action OnGameSaved;
 
     public class OnGameFinishedArgs : EventArgs {
         public float finalTime;
@@ -24,10 +26,12 @@ public class GameManager : MonoBehaviour {
 
     [SerializeField] private float cardInitialHideDelay = 3f; // delay before cards are initially hidden at game start
     [SerializeField] private float flipBackDelay = 1f; // delay before flipping back unmatched cards
+    [SerializeField] private bool autoSave = false;
 
     private List<Card> flippedCards = new List<Card>();
 
     public float CardInitialHideDelay => cardInitialHideDelay;
+    public bool AutoSave => autoSave;
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -37,6 +41,8 @@ public class GameManager : MonoBehaviour {
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        //SaveSystem.DeleteSave(); // Clear any existing save data for testing purposes
     }
 
     private void Start() {
@@ -79,6 +85,17 @@ public class GameManager : MonoBehaviour {
         OnGameFinished?.Invoke(this, args);
     }
 
+    public void InitializeSavedGame(GameSaveData gameSaveData) {
+        gridSystem.LoadFromSave(gameSaveData);
+        scoreCounter.SetScore(gameSaveData.score);
+        turnCounter.SetTurnCount(gameSaveData.turns);
+        turnCounter.SetTurnCountMax(gameSaveData.columns * gameSaveData.rows);
+        gameTimer.SetElapsedTime(gameSaveData.elapsedTime);
+        UiManager.Instance.UpdateToggleUi(new Vector2Int(gameSaveData.columns, gameSaveData.rows));
+    }
+
+
+
 
     private void OnDisable() {
         Card.OnAnyCardButtonPressed -= Card_OnAnyCardButtonPressed;
@@ -113,12 +130,34 @@ public class GameManager : MonoBehaviour {
             // Match found
             Debug.Log($"Matched: {first.GetCardType()} & {second.GetCardType()}");
 
-            first.SetActiveButton(false);
+            first.SetActiveButton(false);  // Disable buttons to prevent further interaction with matched cards
             second.SetActiveButton(false);
 
-            scoreCounter.AddScore(1); // Increment score for a match
+            first.SetMatched(true); // Set matched state to true for both cards
+            second.SetMatched(true);
 
-            CheckforWin();
+            scoreCounter.AddScore(1); // Increment score for a successful match
+            turnCounter.AddTurnCount(1); // Increment turn count for each pair of cards flipped
+
+            bool isWin = CheckforWin();
+            if (isWin) {
+                // Game win logic handled in CheckforWin method
+                gameTimer.StopTimer();
+
+                OnGameFinishedArgs args = new OnGameFinishedArgs {
+                    finalTime = gameTimer.GetElapsedTime(),
+                    finalScore = scoreCounter.GetScore(),
+                    totalTurns = turnCounter.GetTurnCount(),
+                    lossType = LossType.None
+                };
+
+                OnGameFinished?.Invoke(this, args);
+            }
+            else {
+                //Save game state after a successful match if autoSave is enabled
+                if (autoSave)
+                    SaveGameState();
+            }
         }
         else {
             // No match, flip back after delay
@@ -126,32 +165,41 @@ public class GameManager : MonoBehaviour {
             
             StartCoroutine(FlipBackAnimWithDelay(first, second, flipBackDelay));
 
-            turnCounter.AddTurnCount(1); // Decrement turns for a mismatch
+            turnCounter.AddTurnCount(1); // Increment turn count for each non pair of cards flipped
         }
 
         flippedCards.Clear();
     }
 
-    private void CheckforWin() {
+    private bool CheckforWin() {
         if(gridSystem.GetTotalSlots() / 2 == scoreCounter.GetScore()) { // All pairs matched 
-            gameTimer.StopTimer();
+
             Debug.Log($"You win! Time: {Mathf.RoundToInt(gameTimer.GetElapsedTime())} seconds, Turns: {turnCounter.GetTurnCount()}");
 
-            OnGameFinishedArgs args = new OnGameFinishedArgs {
-                finalTime = gameTimer.GetElapsedTime(),
-                finalScore = scoreCounter.GetScore(),
-                totalTurns = turnCounter.GetTurnCount(),
-                lossType = LossType.None
-            };
-
-            OnGameFinished?.Invoke(this, args);
+            return true;
         }
+        return false;
     }
 
     private IEnumerator FlipBackAnimWithDelay(Card first, Card second,float delay) {
         yield return new WaitForSeconds(delay);
         first.FlipBackCard();
         second.FlipBackCard();
+    }
+
+    private void SaveGameState() {
+        GameSaveData gameSaveData = SaveSystem.CreateSavableData(gridSystem.GetSlots(), gridSystem.GetGridSize().x,
+                                                                 gridSystem.GetGridSize().y, scoreCounter.GetScore(),
+                                                                turnCounter.GetTurnCount(),gameTimer.GetElapsedTime());
+
+        SaveSystem.SaveGameData(gameSaveData);
+
+        OnGameSaved?.Invoke();
+    }
+
+    public void ResetGame() {
+        SaveSystem.DeleteSave();
+        InitializeNewGame(gridSystem.GetGridSize());
     }
 
 }
