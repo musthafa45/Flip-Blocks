@@ -17,6 +17,7 @@ public class Card : MonoBehaviour {
     private CardType cardType;
     private Coroutine flipRoutine;
 
+    private bool isFlipped = false;
     private bool isMatched = false;
 
     public void SetActiveButton(bool v) {
@@ -47,6 +48,9 @@ public class Card : MonoBehaviour {
     public CardType GetCardType() => cardType;
 
     public void FlipCard() {
+
+        isFlipped = true;
+
         if (flipRoutine != null) {
             StopCoroutine(flipRoutine);
         }
@@ -55,6 +59,9 @@ public class Card : MonoBehaviour {
     }
 
     public void FlipBackCard(float delay = 0.5f) {
+
+        isFlipped = false;
+
         if (flipRoutine != null) {
             StopCoroutine(flipRoutine);
         }
@@ -96,9 +103,10 @@ public class Card : MonoBehaviour {
     }
 
     private void OnButtonPressed() {
-        if (isMatched) return;
+        if (isMatched || isFlipped) return;
 
         FlipCard();
+
         OnAnyCardButtonPressed?.Invoke(this, new OnAnyCardButtonPressedArgs { card = this });
     }
 
